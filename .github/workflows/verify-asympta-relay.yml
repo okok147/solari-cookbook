@@ -1,0 +1,40 @@
+name: Verify Asympta Relay
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/asympta-relay-ts/**"
+      - ".github/workflows/verify-asympta-relay.yml"
+  pull_request:
+    paths:
+      - "examples/asympta-relay-ts/**"
+      - ".github/workflows/verify-asympta-relay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/asympta-relay-ts
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: examples/asympta-relay-ts/package.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Kernel tests
+        run: npm test
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Python lab syntax
+        run: python3 -m py_compile lab.py
