@@ -11,6 +11,9 @@ on:
         options:
           - contractor
           - offboard
+  push:
+    paths:
+      - ".github/solari-run.trigger"
 
 permissions:
   contents: write
@@ -30,14 +33,14 @@ jobs:
         working-directory: examples/asympta-relay-ts
         env:
           SOLARI_API_KEY: ${{ secrets.SOLARI_API_KEY }}
-          ASYMPTA_SCENARIO: ${{ inputs.scenario }}
+          ASYMPTA_SCENARIO: ${{ inputs.scenario || 'contractor' }}
           DEMO_APPROVE: "1"
         run: |
           test -n "$SOLARI_API_KEY"
           npm start 2>&1 | tee ../../site/latest-run.log
       - name: Verify and extract evidence
         env:
-          ASYMPTA_SCENARIO: ${{ inputs.scenario }}
+          ASYMPTA_SCENARIO: ${{ inputs.scenario || 'contractor' }}
         run: python3 scripts/extract-solari-evidence.py
       - name: Publish evidence
         run: |
