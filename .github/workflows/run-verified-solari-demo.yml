@@ -1,0 +1,48 @@
+name: Run verified Solari demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: Scenario to execute
+        required: true
+        default: contractor
+        type: choice
+        options:
+          - contractor
+          - offboard
+
+permissions:
+  contents: write
+
+jobs:
+  run-solari:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        working-directory: examples/asympta-relay-ts
+        run: npm install --no-audit --no-fund
+      - name: Execute real Solari run
+        working-directory: examples/asympta-relay-ts
+        env:
+          SOLARI_API_KEY: ${{ secrets.SOLARI_API_KEY }}
+          ASYMPTA_SCENARIO: ${{ inputs.scenario }}
+          DEMO_APPROVE: "1"
+        run: |
+          test -n "$SOLARI_API_KEY"
+          npm start 2>&1 | tee ../../site/latest-run.log
+      - name: Verify and extract evidence
+        env:
+          ASYMPTA_SCENARIO: ${{ inputs.scenario }}
+        run: python3 scripts/extract-solari-evidence.py
+      - name: Publish evidence
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/latest-run.json site/latest-run.log
+          git commit -m "evidence: publish verified Solari run"
+          git push
