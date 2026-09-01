@@ -1,0 +1,7 @@
+{
+  "schema": "asympta.solari.evidence/0.2",
+  "verified": false,
+  "execution": "none",
+  "status": "NO_VERIFIED_SOLARI_RUN",
+  "message": "No real Solari execution artifact has been published yet. The page will not simulate success."
+}
